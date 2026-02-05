@@ -1,0 +1,25 @@
+{
+  "description": "PHANTOM - Privacy-preserving Hedge Analysis and Network Trading Orchestration Manager",
+  "license": "MIT",
+  "author": "0x0000000000000000000000000000000000000000",
+  "social": {
+    "website": "https://phantom.iexec.io",
+    "github": "https://github.com/Tonyflam/exec_hacks"
+  },
+  "logo": "",
+  "categories": ["defi", "privacy", "risk-analysis"],
+  "app": {
+    "owner": "0x0000000000000000000000000000000000000000",
+    "name": "PHANTOM",
+    "type": "DOCKER",
+    "multiaddr": "docker.io/phantomdefi/phantom-iapp:latest",
+    "checksum": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "mrenclave": {
+      "provider": "SCONE",
+      "version": "v5",
+      "entrypoint": "node /app/src/app.js",
+      "heapSize": 1073741824,
+      "fingerprint": ""
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "phantom-iapp",
+  "version": "1.0.0",
+  "description": "PHANTOM - Confidential DeFi Intelligence Engine running in iExec TEE",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "iapp test",
+    "deploy": "iapp deploy --chain arbitrum-sepolia-testnet",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@iexec/dataprotector": "^2.0.0-beta.23",
+    "ethers": "^6.9.0"
+  },
+  "devDependencies": {
+    "@iexec/iapp": "^1.0.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "PHANTOM Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/phantom"
+  },
+  "keywords": [
+    "iexec",
+    "tee",
+    "defi",
+    "privacy",
+    "portfolio",
+    "risk-analysis",
+    "confidential-computing"
+  ]
+}
