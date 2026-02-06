@@ -206,7 +206,7 @@
 
 ### Frontend Setup
 ```bash
-cd phantom/frontend
+cd frontend
 npm install
 npm run dev
 # Open http://localhost:3000

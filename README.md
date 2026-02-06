@@ -139,8 +139,8 @@ frontend/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/phantom.git
-cd phantom
+git clone https://github.com/Tonyflam/exec_hacks.git
+cd exec_hacks
 
 # Install frontend dependencies
 cd frontend
