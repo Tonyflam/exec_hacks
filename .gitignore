@@ -33,6 +33,11 @@ contracts/lib/
 .DS_Store
 Thumbs.db
 
+# Demo & Internal Materials (not for judges)
+DEMO_SCRIPT.md
+DEMO_QUICK_REF.md
+*.draft.md
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

@@ -8,6 +8,14 @@
 ![Account Abstraction](https://img.shields.io/badge/ERC--4337-Account%20Abstraction-orange)
 ![Bulk Processing](https://img.shields.io/badge/iExec-Bulk%20Processing-yellow)
 
+## 🎥 Demo Video
+
+[![PHANTOM Demo Video](https://img.shields.io/badge/▶️-Watch%20Demo%20Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_LINK_HERE)
+
+**4-Minute Demo**: See PHANTOM in action—confidential portfolio analysis, MEV protection, and gasless transactions powered by Intel SGX TEE.
+
+---
+
 ## 🌟 Overview
 
 **PHANTOM** is a revolutionary confidential DeFi intelligence engine that transforms how users manage their on-chain portfolios. By leveraging iExec's Trusted Execution Environment (TEE), PHANTOM enables sophisticated portfolio analysis, risk assessment, and automated strategy execution—all while keeping your positions, strategies, and trading signals completely private.
