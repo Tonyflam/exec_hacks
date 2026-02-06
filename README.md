@@ -10,7 +10,7 @@
 
 ## 🎥 Demo Video
 
-[![PHANTOM Demo Video](https://img.shields.io/badge/▶️-Watch%20Demo%20Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_LINK_HERE)
+[![PHANTOM Demo Video](https://img.shields.io/badge/▶️-Watch%20Demo%20Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/8r71KfCsuVk)
 
 **4-Minute Demo**: See PHANTOM in action—confidential portfolio analysis, MEV protection, and gasless transactions powered by Intel SGX TEE.
 
