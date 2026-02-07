@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import { 
-  Shield, TrendingUp, TrendingDown, AlertTriangle, 
+  Shield, TrendingUp, TrendingDown,
   ChevronRight, Clock, Zap, Lock, RefreshCw,
-  PieChart, BarChart3, Activity, Wallet
+  BarChart3, Activity, Wallet
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency, formatPercent, getRiskColor, getRiskLabel } from '@/lib/utils';
 import { RiskGauge } from '@/components/risk-gauge';
 import { PositionCard } from '@/components/position-card';
-import { ActivityFeed } from '@/components/activity-feed';
 
 // Mock data for demonstration
 const mockPortfolio = {
@@ -36,26 +35,9 @@ const mockPortfolio = {
 };
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const [portfolio, setPortfolio] = useState(mockPortfolio);
-  const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  // Redirect if not connected
-  if (!isConnected) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <Lock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
-          <p className="text-gray-400 mb-6">Connect your wallet to view your dashboard</p>
-          <Link href="/#connect">
-            <button className="phantom-button">Connect Wallet</button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
@@ -68,6 +50,19 @@ export default function DashboardPage() {
     }));
     setIsAnalyzing(false);
   };
+
+  if (!isConnected) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
+          <p className="text-gray-400 mb-6">Connect your wallet to view your dashboard</p>
+          <button className="phantom-button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Connect Wallet</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

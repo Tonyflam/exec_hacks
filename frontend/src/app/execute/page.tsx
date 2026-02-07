@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import {
-  Zap, Shield, Lock, Loader2, CheckCircle, AlertTriangle,
+  Zap, Shield, Lock, Loader2, CheckCircle,
   ArrowRight, TrendingUp, TrendingDown, Wallet, Clock,
   Settings, ChevronDown
 } from 'lucide-react';
-import { formatCurrency, formatPercent } from '@/lib/utils';
+import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 
 // Mock strategy from analysis
 const mockStrategy = {
@@ -410,12 +411,12 @@ export default function ExecutePage() {
 
               {/* Actions */}
               <div className="flex gap-4">
-                <a href="/dashboard" className="flex-1">
+                <Link href="/dashboard" className="flex-1">
                   <button className="w-full phantom-button flex items-center justify-center gap-2">
                     View Dashboard
                     <ArrowRight className="w-4 h-4" />
                   </button>
-                </a>
+                </Link>
                 <button
                   onClick={() => setExecutionResult(null)}
                   className="px-6 py-3 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"

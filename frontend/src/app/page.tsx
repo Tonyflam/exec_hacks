@@ -116,18 +116,18 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={isConnected ? '/dashboard' : '#connect'}>
+              <Link href={isConnected ? '/dashboard' : '/dashboard'}>
                 <button className="phantom-button inline-flex items-center gap-2 text-lg">
                   {isConnected ? 'Go to Dashboard' : 'Connect Wallet'}
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </Link>
-              <Link href="/demo">
+              <a href="https://youtu.be/8r71KfCsuVk" target="_blank" rel="noopener noreferrer">
                 <button className="px-6 py-3 rounded-xl font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all inline-flex items-center gap-2">
                   <Eye className="w-5 h-5" />
                   Watch Demo
                 </button>
-              </Link>
+              </a>
             </div>
           </motion.div>
 
@@ -314,7 +314,7 @@ export default function Home() {
             <p className="text-xl text-gray-400 mb-10">
               Join the future of confidential DeFi. Your portfolio deserves privacy.
             </p>
-            <Link href={isConnected ? '/dashboard' : '#connect'}>
+            <Link href={isConnected ? '/dashboard' : '/dashboard'}>
               <button className="phantom-button text-lg px-8 py-4">
                 {isConnected ? 'Launch Dashboard' : 'Get Started'}
               </button>

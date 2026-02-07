@@ -8,6 +8,7 @@ import { Navigation } from '@/components/navigation';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://phantom-defi.vercel.app'),
   title: 'PHANTOM | Confidential DeFi Intelligence',
   description: 'Privacy-preserving portfolio analysis and strategy execution powered by iExec TEE',
   keywords: ['DeFi', 'Privacy', 'Portfolio', 'iExec', 'TEE', 'Confidential Computing'],
@@ -16,6 +17,13 @@ export const metadata: Metadata = {
     title: 'PHANTOM | Confidential DeFi Intelligence',
     description: 'Privacy-preserving portfolio analysis and strategy execution powered by iExec TEE',
     type: 'website',
+    siteName: 'PHANTOM',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PHANTOM | Confidential DeFi Intelligence',
+    description: 'Privacy-preserving portfolio analysis powered by iExec TEE',
+    creator: '@uniq_minds',
   },
 };
 
@@ -26,6 +34,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+      </head>
       <body className={`${inter.className} bg-phantom-darker min-h-screen`}>
         <Providers>
           <div className="relative min-h-screen flex flex-col">

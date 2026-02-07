@@ -8,7 +8,6 @@ import {
   ChevronRight, Plus, X, Wallet, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePhantom } from '@/hooks/use-phantom';
 import { formatCurrency, getRiskColor, getRiskLabel } from '@/lib/utils';
 
 const protocols = ['Aave', 'Compound', 'Uniswap', 'GMX', 'Curve', 'Balancer', 'Radiant'];
