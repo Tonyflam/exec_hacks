@@ -7,7 +7,23 @@ const nextConfig = {
       fs: false,
       net: false,
       tls: false,
+      child_process: false,
+      dns: false,
     };
+
+    // The iExec SDK transitively depends on kubo-rpc-client → native-fetch → undici.
+    // undici uses private class field syntax (#target in this) that
+    // Next.js 14.1's webpack pipeline cannot parse.
+    // These are only needed for direct IPFS uploads; the DataProtector SDK
+    // routes all operations through iExec's API gateway so stubbing is safe.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'undici': false,
+      'native-fetch': false,
+      'kubo-rpc-client': false,
+      'ipfs-utils': false,
+    };
+
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;
   },

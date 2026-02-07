@@ -9,25 +9,31 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency, getRiskColor, getRiskLabel } from '@/lib/utils';
+import { usePhantom } from '@/hooks/use-phantom';
+import { getExplorerUrl } from '@/lib/iexec-config';
 
 const protocols = ['Aave', 'Compound', 'Uniswap', 'GMX', 'Curve', 'Balancer', 'Radiant'];
 
 const analysisSteps = [
-  { id: 'encrypt', label: 'Encrypting portfolio data', icon: Lock },
+  { id: 'encrypt', label: 'Encrypting via DataProtector', icon: Lock },
   { id: 'submit', label: 'Submitting to TEE', icon: Shield },
-  { id: 'analyze', label: 'Running AI risk analysis', icon: Brain },
-  { id: 'sign', label: 'Signing results', icon: CheckCircle },
+  { id: 'analyze', label: 'Running risk analysis', icon: Brain },
+  { id: 'sign', label: 'Verifying results', icon: CheckCircle },
 ];
 
 export default function AnalyzePage() {
   const { address, isConnected } = useAccount();
+  const { protectWallets, runAnalysis, statusMessage, isInitializing, protectedData } = usePhantom();
+
   const [wallets, setWallets] = useState<string[]>([]);
   const [newWallet, setNewWallet] = useState('');
   const [selectedProtocols, setSelectedProtocols] = useState<string[]>(['Aave', 'Uniswap']);
   const [riskTolerance, setRiskTolerance] = useState<'conservative' | 'moderate' | 'aggressive'>('moderate');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [protectedDataAddress, setProtectedDataAddress] = useState<string | null>(null);
 
   const addWallet = () => {
     if (newWallet && !wallets.includes(newWallet)) {
@@ -48,50 +54,71 @@ export default function AnalyzePage() {
     }
   };
 
-  const runAnalysis = async () => {
+  const runAnalysisFlow = async () => {
+    if (!address) return;
     setIsAnalyzing(true);
     setCurrentStep(0);
     setAnalysisResult(null);
+    setProtectedDataAddress(null);
 
-    // Simulate the analysis steps
-    for (let i = 0; i < analysisSteps.length; i++) {
-      setCurrentStep(i);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Step 1: Encrypt portfolio data via real iExec DataProtector
+      setCurrentStep(0);
+      const allWallets = [address, ...wallets];
+      const pd = await protectWallets(allWallets, (status, step) => {
+        if (step >= 1) setCurrentStep(1);
+      });
+
+      if (!pd) {
+        throw new Error('Failed to protect data');
+      }
+      setProtectedDataAddress(pd.address);
+      setCurrentStep(1);
+
+      // Step 2 & 3: Submit to TEE and run analysis
+      setCurrentStep(2);
+      const result = await runAnalysis(
+        pd.address,
+        selectedProtocols,
+        riskTolerance,
+        (status, step) => {
+          if (step >= 2) setCurrentStep(2);
+          if (step >= 3) setCurrentStep(3);
+        }
+      );
+
+      // Step 4: Results verified
+      setCurrentStep(3);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      if (result) {
+        setAnalysisResult({
+          portfolioScore: result.riskScore,
+          riskLevel: result.riskScore < 30 ? 'low' : result.riskScore < 60 ? 'moderate' : 'high',
+          components: {
+            concentrationRisk: result.breakdown.concentration,
+            protocolRisk: result.breakdown.protocol,
+            correlationRisk: result.breakdown.correlation,
+            liquidityRisk: result.breakdown.liquidity,
+            impermanentLoss: result.breakdown.impermanentLoss,
+            leverageRatio: result.breakdown.leverage,
+          },
+          recommendations: result.recommendations.map((rec: string, i: number) => ({
+            priority: i === 0 ? 'high' : 'medium',
+            action: i === 0 ? 'REDUCE' : 'HEDGE',
+            reason: rec,
+            suggestion: rec,
+          })),
+          protectedDataAddress: pd.address,
+          taskId: result.taskId,
+          timestamp: Date.now(),
+        });
+      }
+    } catch (err) {
+      console.error('Analysis failed:', err);
+    } finally {
+      setIsAnalyzing(false);
     }
-
-    // Mock result
-    setAnalysisResult({
-      portfolioScore: 38,
-      riskLevel: 'moderate',
-      components: {
-        concentrationRisk: 32,
-        protocolRisk: 25,
-        correlationRisk: 42,
-        liquidityRisk: 28,
-        impermanentLoss: 35,
-        leverageRatio: 45,
-      },
-      recommendations: [
-        {
-          priority: 'high',
-          action: 'REDUCE',
-          asset: 'WETH',
-          reason: 'High concentration in ETH',
-          suggestion: 'Reduce ETH exposure by 15%',
-        },
-        {
-          priority: 'medium',
-          action: 'HEDGE',
-          protocol: 'Aave',
-          reason: 'Leverage above optimal',
-          suggestion: 'Repay 20% of borrowed USDC',
-        },
-      ],
-      alerts: [],
-      timestamp: Date.now(),
-    });
-
-    setIsAnalyzing(false);
   };
 
   if (!isConnected) {
@@ -241,12 +268,12 @@ export default function AnalyzePage() {
 
               {/* Submit Button */}
               <button
-                onClick={runAnalysis}
-                disabled={selectedProtocols.length === 0}
+                onClick={runAnalysisFlow}
+                disabled={selectedProtocols.length === 0 || isInitializing}
                 className="w-full phantom-button text-lg py-4 flex items-center justify-center gap-2"
               >
                 <Shield className="w-5 h-5" />
-                Run Confidential Analysis
+                {isInitializing ? 'Initializing SDK...' : 'Run Confidential Analysis'}
               </button>
             </motion.div>
           ) : isAnalyzing ? (

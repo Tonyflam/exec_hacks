@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import { 
@@ -12,13 +12,16 @@ import Link from 'next/link';
 import { formatCurrency, formatPercent, getRiskColor, getRiskLabel } from '@/lib/utils';
 import { RiskGauge } from '@/components/risk-gauge';
 import { PositionCard } from '@/components/position-card';
+import { usePhantom } from '@/hooks/use-phantom';
+import { useSmartAccount } from '@/hooks/use-smart-account';
+import { VAULT_ADDRESS, getExplorerUrl, getArbiscanUrl } from '@/lib/iexec-config';
 
-// Mock data for demonstration
-const mockPortfolio = {
+// Portfolio display data (enriched by on-chain reads when available)
+const defaultPortfolio = {
   totalValue: 125420.50,
   change24h: 3.24,
-  riskScore: 42,
-  lastAnalysis: Date.now() - 3600000,
+  riskScore: 0,
+  lastAnalysis: 0,
   positions: [
     { id: 1, protocol: 'Aave', type: 'supply', asset: 'WETH', amount: 5.2, valueUsd: 16640, apy: 2.1 },
     { id: 2, protocol: 'Aave', type: 'borrow', asset: 'USDC', amount: 8000, valueUsd: 8000, apy: -4.2 },
@@ -35,20 +38,70 @@ const mockPortfolio = {
 };
 
 export default function DashboardPage() {
-  const { isConnected } = useAccount();
-  const [portfolio, setPortfolio] = useState(mockPortfolio);
+  const { isConnected, address } = useAccount();
+  const { protectWallets, runAnalysis, protectedData, statusMessage, isInitializing } = usePhantom();
+  const { onChainPortfolio, onChainRiskReport, totalPortfolios, totalStrategiesExecuted } = useSmartAccount({
+    vaultAddress: VAULT_ADDRESS,
+  });
+
+  const [portfolio, setPortfolio] = useState(defaultPortfolio);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState('');
+
+  // Merge on-chain data when available
+  useEffect(() => {
+    if (onChainPortfolio && (onChainPortfolio as { owner: string }).owner !== '0x0000000000000000000000000000000000000000') {
+      const p = onChainPortfolio as { riskScore: bigint; lastAnalysis: bigint };
+      setPortfolio(prev => ({
+        ...prev,
+        riskScore: Number(p.riskScore),
+        lastAnalysis: Number(p.lastAnalysis) * 1000,
+      }));
+    }
+    if (onChainRiskReport && Number((onChainRiskReport as { timestamp: bigint }).timestamp) > 0) {
+      const r = onChainRiskReport as { portfolioScore: bigint };
+      setPortfolio(prev => ({
+        ...prev,
+        riskScore: Number(r.portfolioScore),
+      }));
+    }
+  }, [onChainPortfolio, onChainRiskReport]);
 
   const handleAnalyze = async () => {
+    if (!address) return;
     setIsAnalyzing(true);
-    // Simulate TEE analysis
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setPortfolio(prev => ({
-      ...prev,
-      riskScore: Math.floor(Math.random() * 30) + 30,
-      lastAnalysis: Date.now(),
-    }));
-    setIsAnalyzing(false);
+    setAnalysisStatus('Encrypting portfolio data via DataProtector...');
+
+    try {
+      // Step 1: Protect wallet data using real iExec DataProtector
+      const pd = await protectWallets([address], (status) => {
+        setAnalysisStatus(status);
+      });
+
+      if (pd) {
+        // Step 2: Run analysis (TEE or local engine)
+        setAnalysisStatus('Running confidential analysis...');
+        const result = await runAnalysis(
+          pd.address,
+          ['Aave', 'Compound', 'Uniswap', 'GMX'],
+          'moderate',
+          (status) => setAnalysisStatus(status)
+        );
+
+        if (result) {
+          setPortfolio(prev => ({
+            ...prev,
+            riskScore: result.riskScore,
+            lastAnalysis: Date.now(),
+          }));
+        }
+      }
+    } catch (err) {
+      console.error('Analysis failed:', err);
+    } finally {
+      setIsAnalyzing(false);
+      setAnalysisStatus('');
+    }
   };
 
   if (!isConnected) {
@@ -77,13 +130,18 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleAnalyze}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || isInitializing}
             className="phantom-button flex items-center gap-2"
           >
             {isAnalyzing ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Analyzing...
+                {analysisStatus || 'Analyzing...'}
+              </>
+            ) : isInitializing ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Initializing SDK...
               </>
             ) : (
               <>
@@ -179,11 +237,24 @@ export default function DashboardPage() {
             <Lock className="w-5 h-5 text-green-500" />
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-white font-medium">Protected</span>
+            <div className={`w-2 h-2 rounded-full ${protectedData ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`} />
+            <span className="text-white font-medium">
+              {protectedData ? 'Protected' : 'Not Protected'}
+            </span>
           </div>
           <div className="text-sm text-gray-400 mt-2">
-            Data encrypted in TEE
+            {protectedData ? (
+              <a
+                href={getExplorerUrl(protectedData.address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-phantom-purple hover:underline"
+              >
+                View on iExec Explorer
+              </a>
+            ) : (
+              'Run analysis to encrypt data'
+            )}
           </div>
         </motion.div>
       </div>
